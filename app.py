@@ -717,7 +717,7 @@ with st.sidebar:
     )
 
     st.markdown("---")
-    run_sim = st.button("▶ Run Simulation", use_container_width=True, type="primary")
+    run_sim = st.button("▶ Run Simulation", width='stretch', type="primary")
 
 # ── Build Model ──
 P = build_transition_matrix(p)
@@ -746,7 +746,7 @@ st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # ── State Diagram ──
 st.subheader("State Transition Diagram")
-st.plotly_chart(create_state_diagram_fig(p), use_container_width=True)
+st.plotly_chart(create_state_diagram_fig(p), width='stretch')
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
@@ -755,24 +755,18 @@ st.header("Phase 2 — Transition Matrix (P)")
 
 with st.expander("📐 Full Transition Matrix P", expanded=False):
     df_P = pd.DataFrame(P, index=ALL_STATES, columns=ALL_STATES)
-    st.dataframe(df_P.style.format("{:.4f}").background_gradient(
-        cmap="Greens", vmin=0, vmax=1
-    ), use_container_width=True)
+    st.dataframe(df_P.style.format("{:.4f}"), width='stretch')
 
 col_q, col_r = st.columns(2)
 with col_q:
     with st.expander("Q Matrix (Transient → Transient)", expanded=False):
         df_Q = pd.DataFrame(Q, index=TRANSIENT_STATES, columns=TRANSIENT_STATES)
-        st.dataframe(df_Q.style.format("{:.4f}").background_gradient(
-            cmap="Blues", vmin=0, vmax=1
-        ), use_container_width=True)
+        st.dataframe(df_Q.style.format("{:.4f}"), width='stretch')
 
 with col_r:
     with st.expander("R Matrix (Transient → Absorbing)", expanded=False):
         df_R = pd.DataFrame(R, index=TRANSIENT_STATES, columns=ABSORBING_STATES)
-        st.dataframe(df_R.style.format("{:.4f}").background_gradient(
-            cmap="Oranges", vmin=0, vmax=1
-        ), use_container_width=True)
+        st.dataframe(df_R.style.format("{:.4f}"), width='stretch')
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
@@ -782,9 +776,7 @@ st.header("Phase 3 — Analytical Engine")
 st.subheader("Fundamental Matrix  F = (I − Q)⁻¹")
 with st.expander("View Fundamental Matrix F", expanded=False):
     df_F = pd.DataFrame(F, index=TRANSIENT_STATES, columns=TRANSIENT_STATES)
-    st.dataframe(df_F.style.format("{:.4f}").background_gradient(
-        cmap="YlGn", vmin=0
-    ), use_container_width=True)
+    st.dataframe(df_F.style.format("{:.4f}"), width='stretch')
 
 st.subheader("Absorption Probabilities  B = F × R")
 df_B = pd.DataFrame(B, index=TRANSIENT_STATES, columns=ABSORBING_STATES)
@@ -798,9 +790,7 @@ with col_a3:
     st.metric("Expected Points per Game", f"{expected_steps[0]:.4f}")
 
 with st.expander("Full B Matrix (from every state)", expanded=False):
-    st.dataframe(df_B.style.format("{:.6f}").background_gradient(
-        cmap="RdYlGn", vmin=0, vmax=1
-    ), use_container_width=True)
+    st.dataframe(df_B.style.format("{:.6f}"), width='stretch')
 
 st.subheader("Expected Visits per State (from 0-0)")
 visit_data = pd.DataFrame({
@@ -822,13 +812,13 @@ fig_visits.update_layout(
     yaxis=dict(gridcolor="rgba(255,255,255,0.08)"),
     height=350,
 )
-st.plotly_chart(fig_visits, use_container_width=True)
+st.plotly_chart(fig_visits, width='stretch')
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
 # ── Sankey Diagram ──
 st.subheader("Flow Diagram (Sankey)")
-st.plotly_chart(create_sankey_diagram(P, p), use_container_width=True)
+st.plotly_chart(create_sankey_diagram(P, p), width='stretch')
 
 st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
@@ -908,12 +898,12 @@ if run_sim or "mc_results" in st.session_state:
         yaxis=dict(gridcolor="rgba(255,255,255,0.08)", title="Expected Visits"),
         height=380, legend=dict(orientation="h", yanchor="bottom", y=1.02),
     )
-    st.plotly_chart(fig_comp, use_container_width=True)
+    st.plotly_chart(fig_comp, width='stretch')
 
     with st.expander("Detailed Comparison Table"):
         st.dataframe(comparison_data.style.format({
             "Analytical": "{:.4f}", "Monte Carlo": "{:.4f}", "Difference": "{:+.4f}"
-        }), use_container_width=True)
+        }), width='stretch')
 
     st.markdown('<hr class="section-divider">', unsafe_allow_html=True)
 
@@ -938,7 +928,7 @@ if run_sim or "mc_results" in st.session_state:
         yaxis=dict(title="Frequency", gridcolor="rgba(255,255,255,0.08)"),
         height=350,
     )
-    st.plotly_chart(fig_hist, use_container_width=True)
+    st.plotly_chart(fig_hist, width='stretch')
 
     # ── Convergence Plot ──
     st.subheader("Convergence — Monte Carlo → Analytical")
@@ -968,7 +958,7 @@ if run_sim or "mc_results" in st.session_state:
         yaxis=dict(title="Avg Points per Game", gridcolor="rgba(255,255,255,0.08)"),
         height=350,
     )
-    st.plotly_chart(fig_conv, use_container_width=True)
+    st.plotly_chart(fig_conv, width='stretch')
 
 else:
     st.info("👈 Set parameters and press **Run Simulation** to launch the Monte Carlo engine and compare with the analytical solution.")
