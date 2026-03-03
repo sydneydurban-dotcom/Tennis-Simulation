@@ -95,10 +95,14 @@ p, li, label {
     background: #fafcfa;
     margin-bottom: 0.5rem;
 }
-[data-testid="stExpander"] summary span {
+[data-testid="stExpander"] summary > span > span:not([class*="icon"]):not([data-testid]) {
     font-family: 'Inter', sans-serif !important;
     font-weight: 600 !important;
     color: #2d5a2d !important;
+}
+/* Ensure Streamlit icon fonts are never overridden */
+[data-testid="stExpander"] summary > span > span[data-testid="stExpanderIconHeader"] {
+    font-family: inherit !important;
 }
 
 .phase-card {
@@ -186,6 +190,16 @@ p, li, label {
     border: none !important;
     font-family: 'Inter', sans-serif !important;
     font-weight: 600 !important;
+}
+
+/* CRITICAL: Protect Streamlit's icon fonts from being overridden */
+[data-testid="stExpanderToggleIcon"],
+.material-symbols-rounded,
+[class*="material-icons"],
+[class*="material-symbols"] {
+    font-family: 'Material Symbols Rounded', 'Material Icons' !important;
+    -webkit-font-feature-settings: normal !important;
+    font-feature-settings: normal !important;
 }
 </style>
 """, unsafe_allow_html=True)
