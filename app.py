@@ -55,7 +55,12 @@ h3 {
     font-weight: 600 !important;
     font-size: 1.15rem !important;
 }
-p, li, span, label, div {
+p, li, label {
+    font-family: 'Inter', sans-serif !important;
+    color: #2a2a2a !important;
+}
+/* Apply to markdown containers but not icon spans */
+[data-testid="stMarkdownContainer"] {
     font-family: 'Inter', sans-serif !important;
     color: #2a2a2a !important;
 }
