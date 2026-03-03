@@ -475,18 +475,16 @@ st.markdown('<div class="info-callout">P is partitioned into <b>Q</b> (transient
             'and <b>R</b> (transient → absorbing) for canonical analysis.</div>',
             unsafe_allow_html=True)
 
-with st.expander("Full Transition Matrix P  (17 × 17)", expanded=False):
-    st.dataframe(fmt_matrix(P, ALL_STATES, ALL_STATES), use_container_width=True, hide_index=True)
+with st.expander("Full Transition Matrix P  (17 x 17)", expanded=False):
+    st.table(fmt_matrix(P, ALL_STATES, ALL_STATES))
 
 c_q, c_r = st.columns(2, gap="large")
 with c_q:
-    with st.expander("Q Matrix — Transient → Transient", expanded=False):
-        st.dataframe(fmt_matrix(Q, TRANSIENT_STATES, TRANSIENT_STATES),
-                     use_container_width=True, hide_index=True)
+    with st.expander("Q Matrix  (Transient to Transient)", expanded=False):
+        st.table(fmt_matrix(Q, TRANSIENT_STATES, TRANSIENT_STATES))
 with c_r:
-    with st.expander("R Matrix — Transient → Absorbing", expanded=False):
-        st.dataframe(fmt_matrix(R, TRANSIENT_STATES, ABSORBING_STATES),
-                     use_container_width=True, hide_index=True)
+    with st.expander("R Matrix  (Transient to Absorbing)", expanded=False):
+        st.table(fmt_matrix(R, TRANSIENT_STATES, ABSORBING_STATES))
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -502,15 +500,13 @@ with m1: st.metric("Server Win Probability", f"{B[0,0]:.6f}")
 with m2: st.metric("Returner Win Probability", f"{B[0,1]:.6f}")
 with m3: st.metric("Expected Points per Game", f"{expected_steps[0]:.4f}")
 
-with st.expander("Fundamental Matrix  F = (I − Q)⁻¹", expanded=False):
+with st.expander("Fundamental Matrix  F = inv(I - Q)", expanded=False):
     st.markdown("F[i,j] = expected visits to state j, starting from state i.")
-    st.dataframe(fmt_matrix(F, TRANSIENT_STATES, TRANSIENT_STATES),
-                 use_container_width=True, hide_index=True)
+    st.table(fmt_matrix(F, TRANSIENT_STATES, TRANSIENT_STATES))
 
-with st.expander("Absorption Probabilities  B = F × R", expanded=False):
+with st.expander("Absorption Probabilities  B = F x R", expanded=False):
     st.markdown("B[i,j] = probability of absorption into state j, starting from state i.")
-    st.dataframe(fmt_matrix(B, TRANSIENT_STATES, ABSORBING_STATES, decimals=6),
-                 use_container_width=True, hide_index=True)
+    st.table(fmt_matrix(B, TRANSIENT_STATES, ABSORBING_STATES, decimals=6))
 
 st.markdown("### Expected State Visits (from 0-0)")
 visit_df = pd.DataFrame({
@@ -596,7 +592,7 @@ if run_sim or "mc_results" in st.session_state:
             "Monte Carlo": [f"{v:.4f}" for v in mc["state_visit_probs"]],
             "Difference": [f"{v:+.4f}" for v in (mc["state_visit_probs"] - F[0])],
         })
-        st.dataframe(cdf, use_container_width=True, hide_index=True)
+        st.table(cdf)
 
     # Game Length Distribution
     st.markdown("### Distribution of Game Length")
