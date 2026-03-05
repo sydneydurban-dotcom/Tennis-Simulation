@@ -325,54 +325,115 @@ GRID = dict(gridcolor="#e0e8e0", gridwidth=1)
 def make_state_diagram(p):
     positions = {
         "0-0": (0, 3),
-        "1-0": (1, 4.2), "0-1": (1, 1.8),
-        "2-0": (2, 5.2), "1-1": (2, 3), "0-2": (2, 0.8),
-        "3-0": (3, 6.2), "2-1": (3, 4.2), "1-2": (3, 1.8), "0-3": (3, -0.2),
-        "3-1": (4.2, 5.2), "1-3": (4.2, 0.8),
-        "Deuce": (5.5, 3),
-        "Ad-In": (6.8, 4.5), "Ad-Out": (6.8, 1.5),
-        "Server Wins": (8.5, 5.5), "Returner Wins": (8.5, 0.5),
+        "1-0": (1.2, 4.2), "0-1": (1.2, 1.8),
+        "2-0": (2.4, 5.4), "1-1": (2.4, 3), "0-2": (2.4, 0.6),
+        "3-0": (3.6, 6.4), "2-1": (3.6, 4.2), "1-2": (3.6, 1.8), "0-3": (3.6, -0.4),
+        "3-1": (5.0, 5.4), "1-3": (5.0, 0.6),
+        "Deuce": (6.5, 3),
+        "Ad-In": (8.0, 4.8), "Ad-Out": (8.0, 1.2),
+        "Server Wins": (10.0, 5.8), "Returner Wins": (10.0, 0.2),
     }
     P = build_transition_matrix(p)
+    q = 1.0 - p
     fig = go.Figure()
 
+    # Draw edges with probability labels
     for i in range(N_TRANSIENT):
         for j in range(N_TOTAL):
             if P[i, j] > 0:
                 x0, y0 = positions[ALL_STATES[i]]
                 x1, y1 = positions[ALL_STATES[j]]
+                prob = P[i, j]
+                is_server = abs(prob - p) < 1e-10
+
                 if j >= N_TRANSIENT:
                     color = "#2e7d32" if ALL_STATES[j] == "Server Wins" else "#c62828"
                     width = 2.5
                 else:
-                    is_server = abs(P[i, j] - p) < 1e-10
                     color = "#43a047" if is_server else "#ef5350"
                     width = 1.5
+
                 fig.add_trace(go.Scatter(
                     x=[x0, x1, None], y=[y0, y1, None],
                     mode='lines', line=dict(width=width, color=color),
                     hoverinfo='skip', showlegend=False,
                 ))
 
+                # Probability label at midpoint, offset slightly to avoid overlap
+                mx = (x0 + x1) / 2
+                my = (y0 + y1) / 2
+                # Offset the label perpendicular to the edge direction
+                dx, dy = x1 - x0, y1 - y0
+                length = max((dx**2 + dy**2)**0.5, 0.01)
+                # Offset toward the "server" side (up) or "returner" side (down)
+                offset = 0.18
+                if is_server:
+                    ox, oy = -dy / length * offset, dx / length * offset
+                else:
+                    ox, oy = dy / length * offset, -dx / length * offset
+
+                fig.add_trace(go.Scatter(
+                    x=[mx + ox], y=[my + oy],
+                    mode='text',
+                    text=[f"{prob:.2f}"],
+                    textfont=dict(size=8, color=color, family="IBM Plex Mono"),
+                    hoverinfo='skip', showlegend=False,
+                ))
+
+    # Draw nodes with tennis score labels
     for s in ALL_STATES:
         x, y = positions[s]
-        if s == "Server Wins":       c, sz = "#2e7d32", 30
-        elif s == "Returner Wins":   c, sz = "#c62828", 30
-        elif s in DUEL_STATES:       c, sz = "#ef6c00", 22
-        else:                        c, sz = "#1565c0", 17
+        tennis = TENNIS_SCORE_MAP.get(s, s)
+
+        if s == "Server Wins":
+            c, sz, border_c = "#2e7d32", 32, "white"
+            label_top = "Game"
+            label_bot = "Server"
+        elif s == "Returner Wins":
+            c, sz, border_c = "#c62828", 32, "white"
+            label_top = "Game"
+            label_bot = "Returner"
+        elif s in DUEL_STATES:
+            c, sz, border_c = "#ef6c00", 24, "white"
+            label_top = s
+            label_bot = tennis
+        else:
+            c, sz, border_c = "#1565c0", 19, "white"
+            label_top = s
+            label_bot = tennis
+
+        # Node marker
         fig.add_trace(go.Scatter(
-            x=[x], y=[y], mode='markers+text',
-            marker=dict(size=sz, color=c, line=dict(width=2, color="white")),
-            text=[s], textposition="top center",
-            textfont=dict(size=10, color="#1a3a1a", family="IBM Plex Mono"),
-            hovertext=f"<b>{s}</b><br>{TENNIS_SCORE_MAP.get(s,s)}",
+            x=[x], y=[y], mode='markers',
+            marker=dict(size=sz, color=c, line=dict(width=2, color=border_c)),
+            hovertext=f"<b>{s}</b><br>{tennis}",
             hoverinfo='text', showlegend=False,
         ))
 
-    fig.update_layout(paper_bgcolor="white", plot_bgcolor="white",
-                      font=dict(family="Inter, sans-serif", color="#2a2a2a", size=12),
-                      height=420, xaxis=dict(visible=False), yaxis=dict(visible=False),
-                      margin=dict(l=10, r=10, t=10, b=10))
+        # State name above node
+        fig.add_trace(go.Scatter(
+            x=[x], y=[y + 0.35],
+            mode='text', text=[label_top],
+            textfont=dict(size=10, color="#1a3a1a", family="IBM Plex Mono, monospace"),
+            hoverinfo='skip', showlegend=False,
+        ))
+
+        # Tennis score below node
+        fig.add_trace(go.Scatter(
+            x=[x], y=[y - 0.35],
+            mode='text', text=[label_bot],
+            textfont=dict(size=9, color="#5a7a5a", family="Inter, sans-serif"),
+            hoverinfo='skip', showlegend=False,
+        ))
+
+    fig.update_layout(
+        paper_bgcolor="white", plot_bgcolor="white",
+        font=dict(family="Inter, sans-serif", color="#2a2a2a", size=12),
+        height=520,
+        xaxis=dict(visible=False, range=[-0.8, 11.0]),
+        yaxis=dict(visible=False, range=[-1.2, 7.4]),
+        margin=dict(l=10, r=10, t=10, b=10),
+    )
     return fig
 
 
